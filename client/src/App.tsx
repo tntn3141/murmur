@@ -5,11 +5,14 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NavBar from "./components/NavBar";
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Container } from "react-bootstrap";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { ChatContextProvider } from "./context/ChatContext";
+import axios from "axios";
+import { Container } from "@mui/material";
+
+axios.defaults.baseURL = "http://127.0.0.1:5000";
+axios.defaults.withCredentials = true;
 
 function App() {
   const { user } = useContext(AuthContext);
@@ -19,9 +22,9 @@ function App() {
       <NavBar />
       <Container>
         <Routes>
-          <Route path="/" element={user ? <Chat /> : <Login />} />
-          <Route path="/login" element={user ? <Chat /> : <Login />} />
-          <Route path="/register" element={user ? <Chat /> : <Register />} />
+          <Route path="/" element={<Chat />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Container>

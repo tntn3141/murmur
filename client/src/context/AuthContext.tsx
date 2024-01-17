@@ -1,18 +1,26 @@
 import React, { createContext, useCallback, useEffect, useState } from "react";
-import { baseUrl, postRequest } from "../utils/services";
+import { Navigate } from "react-router-dom";
+import axios from "axios";
 
 export interface AuthContext {
   user: User;
+  setUser: (user: User) => void;
   registerInfo: RegisterInfo;
   updateRegisterInfo: (arg0: RegisterInfo) => void;
   registerUser: (arg0: React.ChangeEvent<HTMLInputElement>) => void;
   isRegisterLoading: boolean;
-  registerError: string;
+  registerError: {
+    error: boolean;
+    message: string;
+  };
   logoutUser: () => void;
   loginUser: (arg0: React.SyntheticEvent) => void;
   loginInfo: LoginInfo;
   isLoginLoading: boolean;
-  loginError: string;
+  loginError: {
+    error: boolean;
+    message: string;
+  };
   updateLoginInfo: (arg0: LoginInfo) => void;
 }
 
@@ -20,12 +28,14 @@ export interface User {
   _id: string;
   name: string;
   email: string;
+  avatar: string;
 }
 
 export interface RegisterInfo {
   name: string;
   email: string;
   password: string;
+  avatar: string;
 }
 
 export interface LoginInfo {
@@ -47,6 +57,7 @@ export const AuthContextProvider = ({
     name: "",
     email: "",
     password: "",
+    avatar: "",
   });
   const [loginError, setLoginError] = useState(null);
   const [isLoginLoading, setIsLoginLoading] = useState(false);
@@ -73,18 +84,14 @@ export const AuthContextProvider = ({
       e.preventDefault();
       setIsRegisterLoading(true);
       setRegisterError(null);
-      const response = await postRequest(
-        `${baseUrl}/users/register`,
-        JSON.stringify(registerInfo)
-      );
-
-      setIsRegisterLoading(false);
-
-      if (response.error) {
-        return setRegisterError(response);
+      try {
+        const response = await axios.post(`/api/user/register`, registerInfo);
+        setIsRegisterLoading(false);
+        localStorage.setItem("user", response.data);
+        setUser(response.data);
+      } catch (error) {
+        return setRegisterError(error);
       }
-      localStorage.setItem("user", JSON.stringify(response));
-      setUser(response);
     },
     [registerInfo]
   );
@@ -99,16 +106,16 @@ export const AuthContextProvider = ({
       e.preventDefault();
       setIsLoginLoading(true);
       setLoginError(null);
-      const response = await postRequest(
-        `${baseUrl}/users/login`,
-        JSON.stringify(loginInfo)
-      );
-      if (response.error) {
-        return setLoginError(response);
+      try {
+        const response = await axios.post(`/api/users/login`, loginInfo);
+        localStorage.setItem("user", response.data);
+        setUser(response.data);
+        setIsLoginLoading(false);
+      } catch (error) {
+        return setLoginError(error);
       }
-      localStorage.setItem("user", JSON.stringify(response));
-      setUser(response);
-      setIsLoginLoading(false);
+
+      return <Navigate to={"/"} />;
     },
     [loginInfo]
   );
@@ -117,6 +124,7 @@ export const AuthContextProvider = ({
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         registerInfo,
         updateRegisterInfo,
         registerUser,

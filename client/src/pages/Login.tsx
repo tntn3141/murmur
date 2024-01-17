@@ -1,50 +1,72 @@
+import axios from "axios";
 import { useContext } from "react";
-import { Alert, Button, Form, Row, Col, Stack } from "react-bootstrap";
 import { AuthContext } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
+import { useForm, SubmitHandler } from "react-hook-form";
+
+import { TextField, Button, Stack } from "@mui/material";
+
+interface LoginInfo {
+  email: string;
+  password: string;
+}
 
 const Login = () => {
-  const { loginUser, isLoginLoading, loginError, loginInfo, updateLoginInfo } =
-    useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
+
+  const { register, handleSubmit, formState } = useForm<LoginInfo>();
+  const { errors } = formState;
+
+  const onSubmit: SubmitHandler<LoginInfo> = async (data: LoginInfo) => {
+    try {
+      const response = await axios.post(`/api/users/login`, data);
+      const userData = response.data;
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  if (user) {
+    return <Navigate to={"/"} />;
+  }
 
   return (
     <>
-      <Form onSubmit={loginUser}>
-        <Row
-          style={{
-            height: "100vh",
-            justifyContent: "center",
-            paddingTop: "10%",
-          }}
+      <Stack spacing={3} alignItems="center">
+        <h1>Login</h1>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col mx-auto w-[300px] gap-2"
         >
-          <Col xs={6}>
-            <Stack gap={3}>
-              <h2>Login</h2>
-              <Form.Control
-                type="email"
-                placeholder="Email"
-                onChange={(e) =>
-                  updateLoginInfo({ ...loginInfo, email: e.target.value })
-                }
-              />
-              <Form.Control
-                type="password"
-                placeholder="Password"
-                onChange={(e) =>
-                  updateLoginInfo({ ...loginInfo, password: e.target.value })
-                }
-              />
-              <Button variant="primary" type="submit">
-                {isLoginLoading ? "Logging in..." : "Login"}
-              </Button>
-              {loginError?.error && (
-                <Alert variant="danger">
-                  <p>{loginError?.message}</p>
-                </Alert>
-              )}
-            </Stack>
-          </Col>
-        </Row>
-      </Form>
+          <Stack spacing={2}>
+            <TextField
+              label="Email"
+              type="email"
+              variant="outlined"
+              {...register("email", {
+                required: "This field is required",
+              })}
+              error={!!errors.email}
+              helperText={errors.email?.message}
+            />
+            <TextField
+              label="Password"
+              type="password"
+              variant="outlined"
+              {...register("password", {
+                required: "This field is required",
+              })}
+              error={!!errors.password}
+              helperText={errors.password?.message}
+            />
+            <Button type="submit" variant="contained" color="primary">
+              Login
+            </Button>
+          </Stack>
+        </form>
+      </Stack>
     </>
   );
 };

@@ -1,55 +1,51 @@
-import { useFetchRecipient } from "../../hooks/useFetchRecipient";
 import { User } from "../../context/AuthContext";
-import { Chat } from "../../hooks/useFetchRecipient";
-import { Stack } from "react-bootstrap";
-import avatar from "../../assets/avatar.svg";
-import { useContext } from "react";
 import { ChatContext } from "../../context/ChatContext";
-import { baseUrl, postRequest } from "../../utils/services";
+import { useEffect, useState, useContext } from "react";
+import { Avatar } from "@mui/material";
+import axios from "axios";
+
+interface Chat {
+  _id: string;
+  members: Array<string>;
+}
 
 const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
-  const { recipientUser } = useFetchRecipient(chat, user);
-  const { onlineUsers } = useContext(ChatContext);
+  const { updateCurrentChat, newMessage, onlineUsers } = useContext(ChatContext);
+  const [recipientUser, setRecipientUser] = useState(null);
 
-  const isOnline = onlineUsers?.some(
-    (user) => user?.userId === recipientUser?._id
-  );
+  const recipientId = chat?.members?.find((id: string) => id !== user?._id);
+  const isOnline = onlineUsers?.some(onlineUser => onlineUser?.userId === recipientId)
+  
 
-  const handleAddFriend = async () => {
-    const response = await fetch(`${baseUrl}/friends/${recipientUser._id}`, {
-      _id: user._id
-    })
-    console.log(response)
-  }
+  useEffect(() => {
+    const getRecipientUser = async () => {
+      try {
+        const response = await axios.get(`/api/users/findById/${recipientId}`);
+        setRecipientUser(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getRecipientUser();
+  }, [recipientId]);
+
 
   return (
-    <Stack
-      direction="horizontal"
-      gap={3}
-      className="user-card align-items-center p-2 justify-content-between"
+    <div
+      className="my-2 flex justify-between items-center"
       role="button"
+      onClick={() => updateCurrentChat(chat)}
     >
-      <div className="d-flex">
-        <div className="me-2">
-          <img src={avatar} alt="avatar" height="20px" />
-        </div>
-        <div className="text-content">
-          <div className="name">{recipientUser?.name}</div>
-          <div className="text">Text nessage</div>
-        </div>
+      <div className="flex gap-2 items-center">
+        <Avatar alt={recipientUser?.name} src={recipientUser?.avatar} />
+        <p className="hidden sm:inline">{recipientUser?.name}</p>
+        <p>{newMessage?.chatId === chat._id ?  newMessage?.text : ""}</p>
       </div>
-      <div className="d-flex flex-column align-items-end">
-        <div>
-          <button
-            onClick={handleAddFriend}
-          >
-            Add friend
-          </button>
-        </div>
-        <div className="this-user-notifications">2</div>
-        <span className={isOnline ? "user-online" : ""}></span>
+      <div className="">
+        <div className="this-user-notifications">{isOnline ? 1 : 0}</div>
+        <span>{isOnline}</span>
       </div>
-    </Stack>
+    </div>
   );
 };
 

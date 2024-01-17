@@ -3,6 +3,8 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
 const userModel = require("../models/userModel");
+const uploadImage = require("../utils/uploadImage");
+const getBase64 = require("../utils/getBase64");
 
 const createToken = (_id) => {
   const jwtKey = process.env.JWT_SECRET;
@@ -11,7 +13,8 @@ const createToken = (_id) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatar } = req.body;
+    let avatarLink = "";
     let user = await userModel.findOne({ email });
 
     if (user) {
@@ -27,13 +30,20 @@ const registerUser = async (req, res) => {
       return res.status(400).json("Password is insecure.");
     }
 
-    user = new userModel({ name, email, password });
+    if (req.file) {
+      // Convert file object to base64 string
+      const encoded = req.file.buffer.toString("base64");
+      // Upload to imgbb
+      avatarLink = await uploadImage(encoded);
+    }
+
+    user = new userModel({ name, email, password, avatar: avatarLink });
     const bcryptSalt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, bcryptSalt);
     await user.save();
 
     const token = createToken(user._id);
-    res.status(200).json({ _id: user._id, name, email, token });
+    res.status(200).json({ _id: user._id, name, email, avatar, token });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
@@ -54,33 +64,61 @@ const loginUser = async (req, res) => {
     }
 
     const token = createToken(user._id);
-    res.status(200).json({ _id: user._id, name: user.name, email, token });
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email,
+      avatar: user.avatar,
+      token,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
   }
 };
 
-const findUser = async (req, res) => {
+const findUserById = async (req, res) => {
   const userId = req.params.userId;
-
   try {
     const user = await userModel.findById(userId);
-    res.status(200).json(user)
+    const { _id, name, email, avatar } = user;
+    res.status(200).json({ _id, name, email, avatar });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
   }
-}
+};
+
+const findUserByEmail = async (req, res) => {
+  const { userEmail } = req.body;
+  try {
+    const user = await userModel.findOne({ email: userEmail });
+    if (user) {
+      const { _id, name, email, avatar } = user;
+      res.status(200).json({ _id, name, email, avatar });
+    } else {
+      res.status(404).json("No user with such email found.");
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
 
 const getUsers = async (req, res) => {
   try {
     const users = await userModel.find();
-    res.status(200).json(users)
+    res.status(200).json(users);
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
   }
-}
+};
 
-module.exports = { registerUser, loginUser, findUser, getUsers };
+module.exports = {
+  registerUser,
+  loginUser,
+  findUserById,
+  findUserByEmail,
+  getUsers,
+};
