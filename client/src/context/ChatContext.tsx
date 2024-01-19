@@ -33,6 +33,8 @@ interface ChatContextType {
   newMessage: Message;
 
   onlineUsers: Array<OnlineUser>;
+
+  notifications: Array<Notification>;
 }
 
 export interface UserChat {
@@ -51,6 +53,12 @@ export interface Message {
 export interface OnlineUser {
   userId: string;
   socketId: string;
+}
+
+export interface Notification {
+  senderId: string;
+  isRead: boolean;
+  date: Date;
 }
 
 export const ChatContext = createContext<ChatContextType>(null);
@@ -78,6 +86,8 @@ export const ChatContextProvider = ({
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState<Array<OnlineUser>>([]);
 
+  const [notifications, setNotifications] = useState<Array<Notification>>([]);
+
   // Socket
   useEffect(() => {
     const newSocket = io("http://localhost:3000");
@@ -99,7 +109,42 @@ export const ChatContextProvider = ({
     };
   }, [socket]);
 
-  console.log(onlineUsers);
+  // Socket sendMessage
+  useEffect(() => {
+    if (socket === null) return;
+    //?
+    const recipientId = currentChat?.members?.find(
+      (id: string) => id !== user?._id
+    );
+    socket.emit("sendMessage", { ...newMessage, recipientId });
+  }, [newMessage]);
+
+  // Socket receiveMessage receiveNotification
+  useEffect(() => {
+    if (socket === null) return;
+    socket.on("getMessage", (res: Message) => {
+      if (currentChat?._id !== res.chatId) return;
+      setMessages((prev) => [...prev, res]);
+    });
+    /* If the new message is from the current chat, it's considered read */
+    socket.on("getNotification", (res: Notification) => {
+      const isCurrentChat = currentChat?.members.some(
+        (id) => id === res.senderId
+      );
+      console.log("senderId", res.senderId)
+      console.log("currentChatMembers", currentChat.members)
+      if (isCurrentChat) {
+        setNotifications((prev) => [...prev, { ...res, isRead: true }]);
+      } else {
+        setNotifications((prev) => [...prev, res]);
+      }
+    });
+
+    return () => {
+      socket.off("getMessage");
+      socket.off("getNotification");
+    };
+  }, [socket, currentChat]);
 
   // userChats, isUserChatsLoading, userChatsError
   useEffect(() => {
@@ -156,7 +201,7 @@ export const ChatContextProvider = ({
       try {
         const response = await axios.post(`/api/messages`, {
           chatId: currentChatId,
-          sendId: sender._id,
+          senderId: sender._id,
           text: textMessage,
         });
         setNewMessage(response.data);
@@ -189,6 +234,8 @@ export const ChatContextProvider = ({
         newMessage,
 
         onlineUsers,
+
+        notifications
       }}
     >
       {children}

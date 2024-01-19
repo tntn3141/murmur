@@ -9,13 +9,19 @@ interface Chat {
   members: Array<string>;
 }
 
+const onlineIndicatorClasses =
+  "relative after:absolute after:left-8 " +
+  "after:bottom-6 after:w-3 after:h-3 after:bg-green-400 after:rounded-xl ";
+
 const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
-  const { updateCurrentChat, newMessage, onlineUsers } = useContext(ChatContext);
+  const { updateCurrentChat, newMessage, onlineUsers } =
+    useContext(ChatContext);
   const [recipientUser, setRecipientUser] = useState(null);
 
   const recipientId = chat?.members?.find((id: string) => id !== user?._id);
-  const isOnline = onlineUsers?.some(onlineUser => onlineUser?.userId === recipientId)
-  
+  const isOnline = onlineUsers?.some(
+    (onlineUser) => onlineUser?.userId === recipientId
+  );
 
   useEffect(() => {
     const getRecipientUser = async () => {
@@ -29,22 +35,22 @@ const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
     getRecipientUser();
   }, [recipientId]);
 
+  console.log(recipientUser?.name, "isOnline: ", isOnline);
 
   return (
     <div
-      className="my-2 flex justify-between items-center"
+      className={
+        "my-2 flex gap-2 items-center " +
+        (isOnline ? onlineIndicatorClasses : "")
+      }
       role="button"
       onClick={() => updateCurrentChat(chat)}
     >
-      <div className="flex gap-2 items-center">
-        <Avatar alt={recipientUser?.name} src={recipientUser?.avatar} />
-        <p className="hidden sm:inline">{recipientUser?.name}</p>
-        <p>{newMessage?.chatId === chat._id ?  newMessage?.text : ""}</p>
-      </div>
-      <div className="">
-        <div className="this-user-notifications">{isOnline ? 1 : 0}</div>
-        <span>{isOnline}</span>
-      </div>
+      <Avatar alt={recipientUser?.name} src={recipientUser?.avatar} />
+      <p className="hidden sm:inline">{recipientUser?.name}</p>
+      <p className="hidden sm:inline">
+        {newMessage?.chatId === chat._id ? newMessage?.text : ""}
+      </p>
     </div>
   );
 };

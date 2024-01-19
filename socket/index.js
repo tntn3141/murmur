@@ -6,7 +6,7 @@ let onlineUsers = [];
 
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
-  
+
   // Listen to a connection
   socket.on("addNewUser", (userId) => {
     !onlineUsers.some((user) => user.userId === userId) &&
@@ -14,13 +14,28 @@ io.on("connection", (socket) => {
         userId,
         socketId: socket.id,
       });
-    console.log("onlineUsers", onlineUsers);
     io.emit("getOnlineUsers", onlineUsers);
+  });
+
+  socket.on("sendMessage", (message) => {
+    console.log("message", message);
+    const user = onlineUsers.find((user) => {
+      console.log(user);
+      return user.userId === message.recipientId;
+    });
+    if (user) {
+      io.to(user.socketId).emit("getMessage", message);
+      io.to(user.socketId).emit("getNotification", {
+        senderId: message.senderId,
+        isRead: false,
+        date: new Date(),
+      });
+    }
   });
 
   socket.on("disconnect", () => {
     onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-    io.emit("getOnelineUsers", onlineUsers)
+    io.emit("getOnelineUsers", onlineUsers);
   });
 });
 

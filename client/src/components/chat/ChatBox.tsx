@@ -1,21 +1,27 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import { useFetchRecipient } from "../../hooks/useFetchRecipient";
 import moment from "moment";
 import InputEmoji from "react-input-emoji";
+import Linkify from "react-linkify";
 
 const ChatBox = () => {
   const { user } = useContext(AuthContext);
-  const {
-    currentChat,
-    messages,
-    messagesError,
-    sendTextMessage,
-  } = useContext(ChatContext);
+  const { currentChat, messages, messagesError, sendTextMessage } =
+    useContext(ChatContext);
   const [textMessage, setTextMessage] = useState("");
 
-  const { recipientUser, fetchRecipientError } = useFetchRecipient(currentChat, user);
+  const { recipientUser, fetchRecipientError } = useFetchRecipient(
+    currentChat,
+    user
+  );
+
+  const scroll = useRef(null);
+
+  useEffect(() => {
+    scroll.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   if (!recipientUser) {
     return (
@@ -27,9 +33,7 @@ const ChatBox = () => {
 
   if (fetchRecipientError) {
     return (
-      <p style={{ textAlign: "center", width: "100%" }}>
-        {messagesError}
-      </p>
+      <p style={{ textAlign: "center", width: "100%" }}>{messagesError}</p>
     );
   }
 
@@ -38,21 +42,20 @@ const ChatBox = () => {
       <div className="bg-[#1e1e1e] justify-center align-center p-[0.75rem] text-white flex">
         <strong>{recipientUser?.name}</strong>
       </div>
-      <div className="flex flex-col gap-3 overflow-y-scroll h-[60vh] bg-[#171717]">
+      <div className="flex flex-col gap-3 p-3 overflow-y-scroll h-[60vh] bg-[#171717]">
         {messages &&
           messages.map((message, index: number) => {
             return (
               <div
+                ref={scroll}
                 key={index}
-                className={
-                  `${
-                    message?.senderId === user?._id
-                      ? "bg-[#0ea5e9] rounded-xl ml-2 p-2 place-self-start max-w-[50%]"
-                      : "bg-[#27272a] rounded-xl mr-2 p-2 place-self-end max-w-[50%]"
-                  }` + `${index === 0 ? " mt-3" : ""}`
-                }
+                className={`max-w-[50%] rounded-xl p-2 break-words ${
+                  message?.senderId === user?._id
+                    ? "bg-[#0ea5e9] place-self-start"
+                    : "bg-[#27272a] place-self-end"
+                }`}
               >
-                <p>{message.text}</p>
+                <p>{<Linkify>{message.text}</Linkify>}</p>
                 <span className="text-xs italic">
                   {moment(message.createdAt).calendar()}
                 </span>
@@ -60,6 +63,7 @@ const ChatBox = () => {
             );
           })}
       </div>
+
       <div className="flex justify-center items-center p-2 bg-[#1e1e1e]">
         <InputEmoji
           value={textMessage}
