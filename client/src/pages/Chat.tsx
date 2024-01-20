@@ -27,8 +27,8 @@ const Chat = () => {
   if (!user) return <Navigate to={"/login"} />;
 
   return (
-    <div className="flex sm:gap-4">
-      <div className="sm:basis-1/3 basis-2">
+    <div className="flex sm:w-[90%] sm:mx-auto dark:text-[#949B99]">
+      <div className="sm:basis-1/3 basis-2 bg-[#F2F3F5] dark:bg-[#1E1F22] dark:bg-[#1a1a1a] dark:text-[#949B99] px-1.5 pt-1.5">
         <FindChat />
         {userChats?.length < 1 ? null : (
           <div className="flex flex-col">

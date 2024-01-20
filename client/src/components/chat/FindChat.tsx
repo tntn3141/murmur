@@ -3,6 +3,7 @@ import { useState, useContext, useEffect, useRef } from "react";
 import { Button, Input, Avatar, Popper } from "@mui/material";
 import { AuthContext, User } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
+import { useOutsideClick } from "../../hooks/useOutsideClick";
 
 const FindChat = () => {
   const { user } = useContext(AuthContext);
@@ -14,17 +15,24 @@ const FindChat = () => {
 
   // For the enter key eventListener attached to the email input
   const inputEnterRef = useRef(null);
+  // To close the popup when the user clicks outside
+  const ref = useOutsideClick(() => {
+    setIsOpen(false);
+  });
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.code === "Enter") {
+      if (e.code === "Enter" || e.code === "NumpadEnter") {
         findUser();
       }
     };
     const input = inputEnterRef.current;
+
+    if (!input) return;
+
     input.addEventListener("keydown", handleKeyDown);
 
     return () => {
@@ -52,7 +60,7 @@ const FindChat = () => {
     // Check if the user is trying to add themself
     if (firstId === secondId) {
       return setFindUserError("You cannot add yourself.");
-    } 
+    }
     // Check if the user to be added is already in the chat list
     const isUserAdded = userChats.some((userChat) =>
       userChat.members.includes(secondId)
@@ -76,122 +84,75 @@ const FindChat = () => {
   };
 
   return (
-    <>
-      {/* Desktop */}
-      <div className="flex flex-col gap-2 hidden sm:block">
-        <Input
-          ref={inputEnterRef}
-          placeholder="Enter user email..."
-          type="email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Button variant="contained" color="primary" onClick={findUser}>
-          Find
-        </Button>
-        {findUserResult && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 p-2">
-              <Avatar alt={findUserResult.name} src={findUserResult.avatar} />
-              <span>{findUserResult.name}</span>
-            </div>
-            <button
-              className="hover:bg-gray-400"
-              onClick={() => createChat(user._id, findUserResult._id)}
-            >
+    <div className="flex items-center align-center justify-center">
+      <button
+        onClick={(e) => {
+          setAnchorEl(e.currentTarget);
+          setIsOpen(!isOpen);
+        }}
+        className="rounded-full block h-10 w-10 flex items-center justify-center hover:bg-blue-500 hover:text-white border"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 0 24 24"
+          width="24px"
+        >
+          <path d="M0 0h24v24H0V0z" fill="none" />
+          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+        </svg>
+      </button>
+
+      <Popper placement="left" open={isOpen} anchorEl={anchorEl} ref={ref}>
+        <div className="bg-white border p-2">
+          <div className="">
+            <Input
+              autoFocus
+              placeholder="Enter user email..."
+              type="email"
+              ref={inputEnterRef}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Button variant="contained" color="primary" onClick={findUser}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
                 viewBox="0 0 24 24"
                 width="24px"
-                fill="#000000"
+                fill="#ffffff"
               >
                 <path d="M0 0h24v24H0V0z" fill="none" />
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
               </svg>
-            </button>
+            </Button>
           </div>
-        )}
-        {findUserError && <p className="text-red-600">{findUserError}</p>}
-      </div>
 
-      {/* Mobile */}
-      <div className="sm:hidden flex items-center align-center justify-center border">
-        <button
-          onClick={(e) => {
-            setAnchorEl(e.currentTarget);
-            setIsOpen((prev) => !prev);
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 0 24 24"
-            width="24px"
-            fill="#000000"
-          >
-            <path d="M0 0h24v24H0V0z" fill="none" />
-            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-          </svg>
-        </button>
-        <Popper
-          placement="bottom-start"
-          // disablePortal={false}
-          open={isOpen}
-          anchorEl={anchorEl}
-        >
-          <div className="bg-white border p-4">
-            <div className="mb-2">
-              <Input
-                autoFocus
-                placeholder="Enter user email..."
-                type="email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Button variant="contained" color="primary" onClick={findUser}>
+          {findUserResult && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 p-2">
+                <Avatar alt={findUserResult.name} src={findUserResult.avatar} />
+                <span>{findUserResult.name}</span>
+              </div>
+              <button
+                className="hover:bg-gray-400"
+                onClick={() => createChat(user._id, findUserResult._id)}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="24px"
                   viewBox="0 0 24 24"
                   width="24px"
-                  fill="#ffffff"
                 >
                   <path d="M0 0h24v24H0V0z" fill="none" />
-                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                 </svg>
-              </Button>
+              </button>
             </div>
-
-            {findUserResult && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 p-2">
-                  <Avatar
-                    alt={findUserResult.name}
-                    src={findUserResult.avatar}
-                  />
-                  <span>{findUserResult.name}</span>
-                </div>
-                <button
-                  className="hover:bg-gray-400"
-                  onClick={() => createChat(user._id, findUserResult._id)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="24px"
-                    viewBox="0 0 24 24"
-                    width="24px"
-                    fill="#000000"
-                  >
-                    <path d="M0 0h24v24H0V0z" fill="none" />
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                  </svg>
-                </button>
-              </div>
-            )}
-            {findUserError && <p className="text-red-600">{findUserError}</p>}
-          </div>
-        </Popper>
-      </div>
-    </>
+          )}
+          {findUserError && <p className="text-red-600">{findUserError}</p>}
+        </div>
+      </Popper>
+    </div>
   );
 };
 

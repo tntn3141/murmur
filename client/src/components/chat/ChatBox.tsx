@@ -1,10 +1,25 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
+import { ThemeContext } from "../../context/ThemeContext";
 import { useFetchRecipient } from "../../hooks/useFetchRecipient";
 import moment from "moment";
 import InputEmoji from "react-input-emoji";
 import Linkify from "react-linkify";
+import { Box } from "@mui/material";
+
+const PaperplaneSVG = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  fill={props.fill}
+  className="bi bi-send-fill"
+  viewBox="0 0 16 16"
+>
+  <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z" />
+</svg>
+)
 
 const ChatBox = () => {
   const { user } = useContext(AuthContext);
@@ -17,6 +32,7 @@ const ChatBox = () => {
     user
   );
 
+  const { theme } = useContext(ThemeContext)
   const scroll = useRef(null);
 
   useEffect(() => {
@@ -38,58 +54,50 @@ const ChatBox = () => {
   }
 
   return (
-    <div className="w-full">
-      <div className="bg-[#1e1e1e] justify-center align-center p-[0.75rem] text-white flex">
+    <Box>
+      <Box
+        className="justify-center align-center p-[0.75rem] flex bg-[#eeeeee] dark:bg-[#2B2D31]"
+      >
         <strong>{recipientUser?.name}</strong>
-      </div>
-      <div className="flex flex-col gap-3 p-3 overflow-y-scroll h-[60vh] bg-[#171717]">
+      </Box>
+      <Box className="flex flex-col gap-3 p-3 overflow-y-scroll h-[60vh] bg-white dark:bg-[#313338] text-[#060607] dark:text-[#F2F3F5]">
         {messages &&
           messages.map((message, index: number) => {
             return (
-              <div
+              <Box
                 ref={scroll}
                 key={index}
-                className={`max-w-[50%] rounded-xl p-2 break-words ${
+                className={`max-w-[50%] rounded-xl p-2 break-words text-white ${
                   message?.senderId === user?._id
-                    ? "bg-[#0ea5e9] place-self-start"
-                    : "bg-[#27272a] place-self-end"
+                    ? "place-self-start text-white bg-[#2986cc] dark:bg-[#0b5394]"
+                    : "place-self-end bg-[#5b5b5b] dark:bg-[#444444]"
                 }`}
               >
                 <p>{<Linkify>{message.text}</Linkify>}</p>
                 <span className="text-xs italic">
                   {moment(message.createdAt).calendar()}
                 </span>
-              </div>
+              </Box>
             );
           })}
-      </div>
+      </Box>
 
-      <div className="flex justify-center items-center p-2 bg-[#1e1e1e]">
+      <div className="flex justify-center items-center p-1.5 bg-[#EEEEEE] dark:bg-[#2B2D31]">
         <InputEmoji
           value={textMessage}
           onChange={setTextMessage}
           fontFamily="noto sans"
-          borderColor="rgba(72, 112, 223, 0.2)"
         />
         <button
-          className="send-btn flex justify-center items-center"
+          className="send-btn flex justify-center items-center w-10"
           onClick={() =>
             sendTextMessage(textMessage, user, currentChat._id, setTextMessage)
           }
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className="bi bi-send-fill"
-            viewBox="0 0 16 16"
-          >
-            <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z" />
-          </svg>
+          <PaperplaneSVG fill={theme === "light" ? "black" : "white"} />
         </button>
       </div>
-    </div>
+    </Box>
   );
 };
 

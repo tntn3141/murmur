@@ -10,7 +10,7 @@ interface Chat {
 }
 
 const onlineIndicatorClasses =
-  "relative after:absolute after:left-8 " +
+  "font-bold relative after:absolute after:left-8 " +
   "after:bottom-6 after:w-3 after:h-3 after:bg-green-400 after:rounded-xl ";
 
 const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
@@ -40,7 +40,7 @@ const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
   return (
     <div
       className={
-        "my-2 flex gap-2 items-center " +
+        "my-2 flex gap-2 items-center text-black dark:text-[#949B99] " +
         (isOnline ? onlineIndicatorClasses : "")
       }
       role="button"
