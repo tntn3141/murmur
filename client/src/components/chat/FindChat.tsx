@@ -3,11 +3,27 @@ import { useState, useContext, useEffect, useRef } from "react";
 import { Button, Input, Avatar, Popper } from "@mui/material";
 import { AuthContext, User } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
+import { ThemeContext } from "../../context/ThemeContext";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
+
+const FinderSVG = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="24px"
+    viewBox="0 0 24 24"
+    width="24px"
+    fill={props.fill}
+    stroke={props.stroke}
+  >
+    <path d="M0 0h24v24H0V0z" fill="none" />
+    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+  </svg>
+);
 
 const FindChat = () => {
   const { user } = useContext(AuthContext);
   const { userChats, setUserChats } = useContext(ChatContext);
+  const { theme } = useContext(ThemeContext);
 
   const [findUserResult, setFindUserResult] = useState<User>(null);
   const [findUserError, setFindUserError] = useState(null);
@@ -84,33 +100,26 @@ const FindChat = () => {
   };
 
   return (
-    <div className="flex items-center align-center justify-center">
+    <div className="">
       <button
         onClick={(e) => {
           setAnchorEl(e.currentTarget);
           setIsOpen(!isOpen);
         }}
-        className="rounded-full block h-10 w-10 flex items-center justify-center hover:bg-blue-500 hover:text-white border"
+        className="rounded-full block h-[40px] w-[40px] flex items-center justify-center hover:bg-blue-500 hover:text-white border-2 border-black dark:border-white"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24px"
-          viewBox="0 0 24 24"
-          width="24px"
-        >
-          <path d="M0 0h24v24H0V0z" fill="none" />
-          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-        </svg>
+        <FinderSVG fill={theme === "light" ? "black" : "white"} />
       </button>
 
       <Popper placement="left" open={isOpen} anchorEl={anchorEl} ref={ref}>
-        <div className="bg-white border p-2">
+        <div className="dark:bg-[#2B2D31] m-2 border p-2">
           <div className="">
             <Input
               autoFocus
               placeholder="Enter user email..."
               type="email"
               ref={inputEnterRef}
+              className="dark:text-[#FFFFFF]"
               onChange={(e) => setEmail(e.target.value)}
             />
             <Button variant="contained" color="primary" onClick={findUser}>

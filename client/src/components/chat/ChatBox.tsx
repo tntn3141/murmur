@@ -10,16 +10,16 @@ import { Box } from "@mui/material";
 
 const PaperplaneSVG = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="16"
-  height="16"
-  fill={props.fill}
-  className="bi bi-send-fill"
-  viewBox="0 0 16 16"
->
-  <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z" />
-</svg>
-)
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    fill={props.fill}
+    className="bi bi-send-fill"
+    viewBox="0 0 16 16"
+  >
+    <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z" />
+  </svg>
+);
 
 const ChatBox = () => {
   const { user } = useContext(AuthContext);
@@ -32,7 +32,7 @@ const ChatBox = () => {
     user
   );
 
-  const { theme } = useContext(ThemeContext)
+  const { theme } = useContext(ThemeContext);
   const scroll = useRef(null);
 
   useEffect(() => {
@@ -41,9 +41,14 @@ const ChatBox = () => {
 
   if (!recipientUser) {
     return (
-      <p style={{ textAlign: "center", width: "100%" }}>
-        No conversation selected yet.
-      </p>
+      <div className="h-full p-8 flex flex-col bg-white dark:bg-[#313338] text-[#060607] dark:text-[#F2F3F5] justify-center ">
+        <p>No conversation selected yet.</p>
+        <br></br>
+        <p className="text-justify">
+          If you wish to log in using another account to test how the app works,
+          please use another browser to do so.
+        </p>
+      </div>
     );
   }
 
@@ -54,13 +59,14 @@ const ChatBox = () => {
   }
 
   return (
-    <Box>
-      <Box
-        className="justify-center align-center p-[0.75rem] flex bg-[#eeeeee] dark:bg-[#2B2D31]"
-      >
+    <div className="">
+      <Box className="justify-center align-center p-4 flex bg-[#eeeeee] dark:bg-[#2B2D31]">
         <strong>{recipientUser?.name}</strong>
       </Box>
-      <Box className="flex flex-col gap-3 p-3 overflow-y-scroll h-[60vh] bg-white dark:bg-[#313338] text-[#060607] dark:text-[#F2F3F5]">
+      <Box className="chat-window flex flex-col gap-3 p-3 overflow-y-scroll bg-white dark:bg-[#313338] text-[#060607] dark:text-[#F2F3F5]">
+        <p className="text-[#80848E] dark:text-[#B5BAC1] mx-auto">
+          This is the start of your conversation with {recipientUser?.name}
+        </p>
         {messages &&
           messages.map((message, index: number) => {
             return (
@@ -97,7 +103,7 @@ const ChatBox = () => {
           <PaperplaneSVG fill={theme === "light" ? "black" : "white"} />
         </button>
       </div>
-    </Box>
+    </div>
   );
 };
 

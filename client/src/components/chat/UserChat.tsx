@@ -35,8 +35,6 @@ const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
     getRecipientUser();
   }, [recipientId]);
 
-  console.log(recipientUser?.name, "isOnline: ", isOnline);
-
   return (
     <div
       className={
@@ -48,7 +46,7 @@ const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
     >
       <Avatar alt={recipientUser?.name} src={recipientUser?.avatar} />
       <p className="hidden sm:inline">{recipientUser?.name}</p>
-      <p className="hidden sm:inline">
+      <p className="hidden sm:inline truncate">
         {newMessage?.chatId === chat._id ? newMessage?.text : ""}
       </p>
     </div>

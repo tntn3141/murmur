@@ -7,3 +7,11 @@
 body {
   font-family: "Noto Sans", sans-serif;
 }
+
+.main {
+  height: calc(100vh - 72px);
+}
+
+.chat-window {
+  height: calc(100vh - 72px - 56px - 63.6px);
+}

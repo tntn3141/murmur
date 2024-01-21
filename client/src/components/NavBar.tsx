@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Menu, MenuItem } from "@mui/material";
 import { ThemeContext } from "../context/ThemeContext";
@@ -44,6 +44,7 @@ function NavBar() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const navigate = useNavigate();
 
   const { theme, toggleTheme } = useContext(ThemeContext);
 
@@ -72,38 +73,39 @@ function NavBar() {
         </Link>
       </h1>
 
-      {user && (
-        <div className="hidden sm:flex gap-4">
-          <button onClick={() => toggleTheme()} className="block">
+      <div className="hidden sm:flex gap-4">
+        <button onClick={() => toggleTheme()} className="block">
           {theme === "light" ? (
             <DarkIconSVG />
           ) : (
             <LightIconSVG stroke={"white"} fill={"white"} />
           )}
         </button>
-          <Link to="/" className={linkClasses}>
-            Profile
-          </Link>
-          <Link
-            onClick={() => logoutUser()}
-            to="/login"
-            className={linkClasses}
-          >
-            Log out
-          </Link>
-        </div>
-      )}
-
-      {!user && (
-        <div className="hidden sm:block">
-          <Link to="/login" className={linkClasses}>
-            Login
-          </Link>
-          <Link to="/register" className={linkClasses}>
-            Register
-          </Link>
-        </div>
-      )}
+        {user && (
+          <>
+            <Link to="/profile" className={linkClasses}>
+              Profile
+            </Link>
+            <Link
+              onClick={() => logoutUser()}
+              to="/login"
+              className={linkClasses}
+            >
+              Log out
+            </Link>
+          </>
+        )}
+        {!user && (
+          <>
+            <Link to="/login" className={linkClasses}>
+              Login
+            </Link>
+            <Link to="/register" className={linkClasses}>
+              Register
+            </Link>
+          </>
+        )}
+      </div>
 
       {/* Menu on mobile */}
       <div className="sm:hidden flex gap-4">
@@ -145,16 +147,46 @@ function NavBar() {
             "aria-labelledby": "basic-button",
           }}
         >
-          <MenuItem onClick={handleClose}>Profile</MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleClose();
-              console.log("aaa");
-              logoutUser();
-            }}
-          >
-            Logout
-          </MenuItem>
+          {!user && (
+            <div>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  navigate("/login");
+                }}
+              >
+                Login
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  navigate("/register");
+                }}
+              >
+                Register
+              </MenuItem>
+            </div>
+          )}
+          {user && (
+            <div>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  navigate("/profile");
+                }}
+              >
+                Profile
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  logoutUser();
+                }}
+              >
+                Logout
+              </MenuItem>
+            </div>
+          )}
         </Menu>
       </div>
     </nav>

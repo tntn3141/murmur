@@ -8,7 +8,6 @@ require("dotenv").config();
 const userRoute = require("./routes/userRoute");
 const chatRoute = require("./routes/chatRoute");
 const messageRoute = require("./routes/messageRoute");
-const friendRoute = require("./routes/friendRoute");
 
 const PORT = process.env.PORT || 5000;
 const baseUrl = "http://localhost:5173";
@@ -52,7 +51,6 @@ app.use(multer.single("image"));
 app.use("/api/users", userRoute);
 app.use("/api/chats", chatRoute);
 app.use("/api/messages", messageRoute);
-app.use("/api/friends", friendRoute);
 
 mongoose
   .connect(process.env.MONGODB, { dbName: "murmur" })

@@ -29,6 +29,9 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
+  /* Technically createdAt should be Date, but it gets converted to string 
+  because of localStorage so here it's typed as string anyway*/
+  createdAt: string;
 }
 
 export interface RegisterInfo {

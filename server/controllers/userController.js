@@ -43,7 +43,16 @@ const registerUser = async (req, res) => {
     await user.save();
 
     const token = createToken(user._id);
-    res.status(200).json({ _id: user._id, name, email, avatar, token });
+    res
+      .status(200)
+      .json({
+        _id: user._id,
+        name,
+        email,
+        avatar,
+        createdAt: user.createdAt,
+        token,
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
@@ -70,6 +79,7 @@ const loginUser = async (req, res) => {
       email,
       avatar: user.avatar,
       token,
+      createdAt: user.createdAt,
     });
   } catch (error) {
     console.log(error);
@@ -115,10 +125,44 @@ const getUsers = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    if (req.file) {
+      const encoded = req.file.buffer.toString("base64");
+      const avatarLink = await uploadImage(encoded);
+      req.body.avatar = avatarLink;
+      console.log("avatar", avatarLink)
+    }
+    const updatedUser = await userModel.findByIdAndUpdate(
+      req.params.userId,
+      { $set: req.body },
+      { new: true }
+    );
+    console.log("user", updatedUser)
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+// TODO: probably implement soft-deletion instead
+const deleteUser = async (req, res) => {
+  try {
+    await userModel.findByIdAndDelete(req.params.id);
+    res.status(200).json("The account has been deleted.");
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   findUserById,
   findUserByEmail,
   getUsers,
+  updateUser,
+  deleteUser,
 };
