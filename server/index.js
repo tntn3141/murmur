@@ -59,12 +59,12 @@ mongoose
     console.log("Failed to connect to MongoDB. ", error.message)
   );
 
-// app.listen(PORT, (req, res) => {
-//   console.log(`Server currently running on port ${PORT}`);
-// });
+app.listen(PORT, (req, res) => {
+  console.log(`Server currently running on port ${PORT}`);
+});
 
 httpServer.listen(PORT, () => {
-  console.log(`Application is running at https://murmur-chat.fly.dev:${port}`);
+  console.log(`Application is running at https://murmur-chat.fly.dev:${PORT}`);
 })
 
 // Socket
@@ -104,4 +104,4 @@ io.on("connection", (socket) => {
   });
 });
 
-io.listen(process.env.PORT);
+// io.listen(process.env.PORT);
