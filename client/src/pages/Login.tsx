@@ -3,8 +3,7 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
-
-import { TextField, Button, Stack } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 
 interface LoginInfo {
   email: string;
@@ -14,8 +13,7 @@ interface LoginInfo {
 const Login = () => {
   const { user, setUser } = useContext(AuthContext);
 
-  const { register, handleSubmit, formState } = useForm<LoginInfo>();
-  const { errors } = formState;
+  const { register, handleSubmit } = useForm<LoginInfo>();
 
   const onSubmit: SubmitHandler<LoginInfo> = async (data: LoginInfo) => {
     try {
@@ -33,41 +31,42 @@ const Login = () => {
   }
 
   return (
-    <>
+    <div className="main p-10 dark:bg-[#1A1A1A] dark:text-[#F0F2F3]">
       <Stack spacing={3} alignItems="center">
         <h1>Login</h1>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col mx-auto w-[300px] gap-2"
+          className="flex flex-col mx-auto w-[300px] gap-6"
         >
-          <Stack spacing={2}>
-            <TextField
-              label="Email"
+          <div className="flex flex-col gap-2">
+            <label htmlFor="email">Email</label>
+            <input
               type="email"
-              variant="outlined"
+              name="email"
+              placeholder="Email"
+              className="bg-[#F0F0F0] dark:bg-[#313338] !dark:focus:bg-[#313338] p-3"
               {...register("email", {
                 required: "This field is required",
               })}
-              error={!!errors.email}
-              helperText={errors.email?.message}
             />
-            <TextField
-              label="Password"
+            <label htmlFor="password">Password</label>
+            <input
               type="password"
-              variant="outlined"
+              name="password"
+              placeholder="Password"
+              className="bg-[#F0F0F0] dark:bg-[#313338] !dark:focus:bg-[#313338] p-3"
               {...register("password", {
                 required: "This field is required",
               })}
-              error={!!errors.password}
-              helperText={errors.password?.message}
             />
-            <Button type="submit" variant="contained" color="primary">
-              Login
-            </Button>
-          </Stack>
+          </div>
+
+          <Button type="submit" variant="contained" color="primary">
+            Login
+          </Button>
         </form>
       </Stack>
-    </>
+    </div>
   );
 };
 

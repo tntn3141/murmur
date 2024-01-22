@@ -2,7 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { TextField, Button, Stack } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import axios from "axios";
 
 /* Doesn't include user avatar because that means "userAvatar" 
@@ -23,6 +23,7 @@ const Register = () => {
 
   const { register, handleSubmit, formState } = useForm<RegisterInfo>();
   const { errors } = formState;
+  console.log(errors);
 
   // Clean up avatar preview
   useEffect(() => {
@@ -58,43 +59,42 @@ const Register = () => {
   };
 
   return (
-    <>
+    <div className="main p-10 dark:bg-[#1A1A1A] dark:text-[#F0F2F3]">
       <Stack spacing={2} alignItems="center">
         <h1>Register</h1>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col mx-auto w-[300px] gap-2"
         >
-          <Stack spacing={2}>
-            <TextField
-              label="Email"
+          <div className="flex flex-col gap-2">
+            <label htmlFor="email">Email</label>
+            <input
               type="email"
-              variant="outlined"
+              name="email"
+              placeholder="Email"
+              className="bg-[#F0F0F0] dark:bg-[#313338] !dark:focus:bg-[#313338] p-3"
               {...register("email", {
                 required: "This field is required",
               })}
-              error={!!errors.email}
-              helperText={errors.email?.message}
             />
-            <TextField
-              label="Password"
+            <label htmlFor="password">Password</label>
+            <input
               type="password"
-              variant="outlined"
+              name="password"
+              placeholder="Password"
+              className="bg-[#F0F0F0] dark:bg-[#313338] !dark:focus:bg-[#313338] p-3"
               {...register("password", {
                 required: "This field is required",
               })}
-              error={!!errors.password}
-              helperText={errors.password?.message}
             />
-            <TextField
-              label="Name"
-              type="text"
-              variant="outlined"
+            <label htmlFor="name">Name</label>
+            <input
+              name="name"
+              placeholder="Name"
+              className="bg-[#F0F0F0] dark:bg-[#313338] !dark:focus:bg-[#313338] p-3"
               {...register("name", {
                 required: "This field is required",
               })}
-              error={!!errors.name}
-              helperText={errors.name?.message}
             />
             <div>
               <label htmlFor="avatar">Avatar (optional)</label>
@@ -116,13 +116,14 @@ const Register = () => {
                 />
               )}
             </div>
-            <Button type="submit" variant="contained" color="primary">
-              Register
-            </Button>
-          </Stack>
+          </div>
+
+          <Button type="submit" variant="contained" color="primary">
+            Register
+          </Button>
         </form>
       </Stack>
-    </>
+    </div>
   );
 };
 
