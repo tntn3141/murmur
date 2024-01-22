@@ -12,7 +12,7 @@ import { ChatContextProvider } from "./context/ChatContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import axios from "axios";
 
-axios.defaults.baseURL = "http://127.0.0.1:5000";
+axios.defaults.baseURL = "https://murmur-chat.fly.dev";
 axios.defaults.withCredentials = true;
 
 function App() {
