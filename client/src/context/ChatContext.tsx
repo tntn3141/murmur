@@ -90,7 +90,7 @@ export const ChatContextProvider = ({
 
   // Socket
   useEffect(() => {
-    const newSocket = io();
+    const newSocket = io("https://murmur-chat.fly.dev:5000");
     setSocket(newSocket);
     return () => {
       newSocket.disconnect();
