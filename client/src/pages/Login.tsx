@@ -11,9 +11,10 @@ interface LoginInfo {
 }
 
 const Login = () => {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, loginError } = useContext(AuthContext);
 
-  const { register, handleSubmit } = useForm<LoginInfo>();
+  const { register, handleSubmit, formState } = useForm<LoginInfo>();
+  const { errors } = formState;
 
   const onSubmit: SubmitHandler<LoginInfo> = async (data: LoginInfo) => {
     try {
@@ -49,6 +50,9 @@ const Login = () => {
                 required: "This field is required",
               })}
             />
+            {errors.email && (
+              <div className="text-red-500">{errors.email.message}</div>
+            )}
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -59,6 +63,15 @@ const Login = () => {
                 required: "This field is required",
               })}
             />
+            {errors.password && (
+              <div className="text-red-500">{errors.password.message}</div>
+            )}
+
+            {loginError && (
+              <div>
+                {loginError.message}
+              </div>
+            )}
           </div>
 
           <Button type="submit" variant="contained" color="primary">

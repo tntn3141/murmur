@@ -23,7 +23,7 @@ const Register = () => {
 
   const { register, handleSubmit, formState } = useForm<RegisterInfo>();
   const { errors } = formState;
-  console.log(errors);
+  console.log("b", errors);
 
   // Clean up avatar preview
   useEffect(() => {
@@ -54,7 +54,7 @@ const Register = () => {
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
-      console.log(error);
+      console.log("a", error);
     }
   };
 
@@ -77,6 +77,9 @@ const Register = () => {
                 required: "This field is required",
               })}
             />
+            {errors.email && (
+              <div className="text-red-500">{errors.email.message}</div>
+            )}
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -87,6 +90,9 @@ const Register = () => {
                 required: "This field is required",
               })}
             />
+            {errors.password && (
+              <div className="text-red-500">{errors.password.message}</div>
+            )}
             <label htmlFor="name">Name</label>
             <input
               name="name"
@@ -96,6 +102,9 @@ const Register = () => {
                 required: "This field is required",
               })}
             />
+            {errors.name && (
+              <div className="text-red-500">{errors.name.message}</div>
+            )}
             <div>
               <label htmlFor="avatar">Avatar (optional)</label>
               <input
