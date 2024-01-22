@@ -13,7 +13,11 @@ const baseUrl = "https://murmur-chat.netlify.app";
 
 const app = express();
 const server = require("http").createServer(app);
-const io = require("socket.io")(server)
+const io = require("socket.io")(server, {
+  cors: {
+    origin: baseUrl
+  }
+})
 
 const multer = Multer({
   storage: Multer.memoryStorage(),
@@ -29,7 +33,7 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: baseUrl,
+    origin: baseUrl, // https://murmur-chat.netlify.app
   })
 );
 app.use((req, res, next) => {
