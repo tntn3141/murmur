@@ -11,7 +11,7 @@ interface LoginInfo {
 }
 
 const Login = () => {
-  const { user, setUser, loginError } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   const { register, handleSubmit, formState } = useForm<LoginInfo>();
   const { errors } = formState;
