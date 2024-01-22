@@ -12,7 +12,7 @@ import { ChatContextProvider } from "./context/ChatContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import axios from "axios";
 
-axios.defaults.baseURL = "https://murmur-chat-hidden-moon-1149.fly.dev";
+axios.defaults.baseURL = "https://murmur-chat.fly.dev";
 axios.defaults.withCredentials = true;
 
 function App() {
