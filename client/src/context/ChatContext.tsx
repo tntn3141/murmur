@@ -90,7 +90,9 @@ export const ChatContextProvider = ({
 
   // Socket
   useEffect(() => {
-    const newSocket = io("https://murmur-chat.fly.dev:5000");
+    const newSocket = io("https://murmur-chat.fly.dev:3000", {
+      withCredentials: true,
+    });
     setSocket(newSocket);
     return () => {
       newSocket.disconnect();
@@ -131,8 +133,8 @@ export const ChatContextProvider = ({
       const isCurrentChat = currentChat?.members.some(
         (id) => id === res.senderId
       );
-      console.log("senderId", res.senderId)
-      console.log("currentChatMembers", currentChat.members)
+      console.log("senderId", res.senderId);
+      console.log("currentChatMembers", currentChat.members);
       if (isCurrentChat) {
         setNotifications((prev) => [...prev, { ...res, isRead: true }]);
       } else {
@@ -235,7 +237,7 @@ export const ChatContextProvider = ({
 
         onlineUsers,
 
-        notifications
+        notifications,
       }}
     >
       {children}

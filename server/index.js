@@ -1,5 +1,5 @@
 const express = require("express");
-const httpServer = require("http").createServer();
+const { createServer, Server } = require("node:http");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const Multer = require("multer");
@@ -11,10 +11,10 @@ const messageRoute = require("./routes/messageRoute");
 
 const PORT = process.env.PORT || 3000;
 const baseUrl = "https://murmur-chat.netlify.app";
-const SOCKET_PORT = 5000;
 
 const app = express();
-const io = require("socket.io")(httpServer, {cors: baseUrl});
+const httpServer = createServer(app);
+const io = new Server(httpServer, {cors: baseUrl});
 
 const multer = Multer({
   storage: Multer.memoryStorage(),
@@ -59,9 +59,13 @@ mongoose
     console.log("Failed to connect to MongoDB. ", error.message)
   );
 
-app.listen(PORT, (req, res) => {
-  console.log(`Server currently running on port ${PORT}`);
-});
+// app.listen(PORT, (req, res) => {
+//   console.log(`Server currently running on port ${PORT}`);
+// });
+
+httpServer.listen(PORT, () => {
+  console.log(`Application is running at https://murmur-chat.fly.dev:${port}`);
+})
 
 // Socket
 let onlineUsers = [];
@@ -100,4 +104,4 @@ io.on("connection", (socket) => {
   });
 });
 
-io.listen(SOCKET_PORT);
+io.listen(process.env.PORT);
