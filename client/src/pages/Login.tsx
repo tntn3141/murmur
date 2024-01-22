@@ -1,5 +1,5 @@
-import axios from "axios";
-import { useContext } from "react";
+import axios, { AxiosError } from "axios";
+import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -11,19 +11,23 @@ interface LoginInfo {
 }
 
 const Login = () => {
-  const { user, setUser, loginError } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   const { register, handleSubmit, formState } = useForm<LoginInfo>();
   const { errors } = formState;
+
+  const [loginError, setLoginError] = useState(null);
 
   const onSubmit: SubmitHandler<LoginInfo> = async (data: LoginInfo) => {
     try {
       const response = await axios.post(`/api/users/login`, data);
       const userData = response.data;
+      console.log("aaaaa", userData);
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
-      console.log(error);
+      const err = error as AxiosError;
+      setLoginError(err.response.data);
     }
   };
 
@@ -51,7 +55,7 @@ const Login = () => {
               })}
             />
             {errors.email && (
-              <div className="text-red-500">{errors.email.message}</div>
+              <div className="text-red-600">{errors.email.message}</div>
             )}
             <label htmlFor="password">Password</label>
             <input
@@ -64,12 +68,12 @@ const Login = () => {
               })}
             />
             {errors.password && (
-              <div className="text-red-500">{errors.password.message}</div>
+              <div className="text-red-600">{errors.password.message}</div>
             )}
 
             {loginError && (
               <div>
-                {loginError.message}
+                <p className="text-red-600 pt-3">{loginError}</p>
               </div>
             )}
           </div>
