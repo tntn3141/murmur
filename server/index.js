@@ -1,5 +1,5 @@
 const express = require("express");
-const { Server } = require("socket.io");
+const httpServer = require("http").createServer();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const Multer = require("multer");
@@ -14,7 +14,7 @@ const baseUrl = "https://murmur-chat.netlify.app";
 const SOCKET_PORT = 5000;
 
 const app = express();
-const io = new Server({ cors: baseUrl });
+const io = require("socket.io")(httpServer, {cors: baseUrl});
 
 const multer = Multer({
   storage: Multer.memoryStorage(),
