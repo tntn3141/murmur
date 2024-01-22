@@ -1,13 +1,10 @@
-# fly.toml app configuration file generated for delicate-sound-5709 on 2024-01-21T23:26:53+07:00
+# fly.toml app configuration file generated for murmur-chat on 2024-01-22T15:41:31+07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "delicate-sound-5709"
+app = "murmur-chat"
 primary_region = "hkg"
-
-[env]
-  PORT = "8080"
 
 [http_service]
   internal_port = 8080
