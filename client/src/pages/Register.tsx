@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button, Stack } from "@mui/material";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 /* Doesn't include user avatar because that means "userAvatar" 
 would be either of "File" or "FileList" type, which creates extra headache when 
@@ -20,10 +20,10 @@ const Register = () => {
   const [userAvatarPreview, setUserAvatarPreview] = useState("");
   // Separate from RegisterInfo because of type difference
   const [userAvatar, setUserAvatar] = useState<File>(null);
+  const [registerError, setRegisterError] = useState(null);
 
   const { register, handleSubmit, formState } = useForm<RegisterInfo>();
   const { errors } = formState;
-  console.log(errors);
 
   // Clean up avatar preview
   useEffect(() => {
@@ -54,7 +54,8 @@ const Register = () => {
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
-      console.log(error);
+      const err = error as AxiosError
+      setRegisterError(err.response.data)
     }
   };
 
@@ -77,6 +78,9 @@ const Register = () => {
                 required: "This field is required",
               })}
             />
+            {errors.email && (
+              <div className="text-red-600">{errors.email.message}</div>
+            )}
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -87,6 +91,9 @@ const Register = () => {
                 required: "This field is required",
               })}
             />
+            {errors.password && (
+              <div className="text-red-600">{errors.password.message}</div>
+            )}
             <label htmlFor="name">Name</label>
             <input
               name="name"
@@ -96,6 +103,9 @@ const Register = () => {
                 required: "This field is required",
               })}
             />
+            {errors.name && (
+              <div className="text-red-600">{errors.name.message}</div>
+            )}
             <div>
               <label htmlFor="avatar">Avatar (optional)</label>
               <input
@@ -116,6 +126,11 @@ const Register = () => {
                 />
               )}
             </div>
+            {registerError && (
+              <div>
+                <p className="text-red-600 pt-3">{registerError}</p>
+              </div>
+            )}
           </div>
 
           <Button type="submit" variant="contained" color="primary">
