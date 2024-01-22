@@ -9,9 +9,9 @@ const userRoute = require("./routes/userRoute");
 const chatRoute = require("./routes/chatRoute");
 const messageRoute = require("./routes/messageRoute");
 
-const PORT = process.env.PORT || 3000;
-const baseUrl = "https://murmur-chat.netlify.app";
-const SOCKET_PORT = 5000;
+const PORT = process.env.PORT || 5000;
+const baseUrl = "http://localhost:5173";
+const SOCKET_PORT = 3000;
 
 const app = express();
 const io = require("socket.io")(httpServer, {cors: baseUrl});
