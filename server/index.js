@@ -35,10 +35,10 @@ app.use(
 app.use((req, res, next) => {
   res.set({
     "Access-Control-Allow-Origin": baseUrl,
-    "Access-Control-Allow-Headers":
-      "Origin, X-Requested-With, Content-Type, Accept",
-    "Content-Security-Policy":
-      "default-src 'self'; script-src 'nonce-random123' 'strict-dynamic' 'unsafe-inline' https:; object-src 'none'; base-uri 'none';",
+    // "Access-Control-Allow-Headers":
+    //   "Origin, X-Requested-With, Content-Type, Accept",
+    // "Content-Security-Policy":
+    //   "default-src 'self'; script-src 'nonce-random123' 'strict-dynamic' 'unsafe-inline' https:; object-src 'none'; base-uri 'none';",
   });
   next();
 });
