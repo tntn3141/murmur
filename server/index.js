@@ -1,5 +1,4 @@
 const express = require("express");
-const httpServer = require("http").createServer();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const Multer = require("multer");
@@ -9,12 +8,16 @@ const userRoute = require("./routes/userRoute");
 const chatRoute = require("./routes/chatRoute");
 const messageRoute = require("./routes/messageRoute");
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const baseUrl = "http://localhost:5173";
-const SOCKET_PORT = 3000;
 
 const app = express();
-const io = require("socket.io")(httpServer, {cors: baseUrl});
+const server = require("http").createServer(app);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: baseUrl
+  }
+})
 
 const multer = Multer({
   storage: Multer.memoryStorage(),
@@ -59,10 +62,6 @@ mongoose
     console.log("Failed to connect to MongoDB. ", error.message)
   );
 
-app.listen(PORT, (req, res) => {
-  console.log(`Server currently running on port ${PORT}`);
-});
-
 // Socket
 let onlineUsers = [];
 io.on("connection", (socket) => {
@@ -100,4 +99,6 @@ io.on("connection", (socket) => {
   });
 });
 
-io.listen(SOCKET_PORT);
+server.listen(PORT, () => {
+  console.log(`Application is running at port ${PORT}`);
+})

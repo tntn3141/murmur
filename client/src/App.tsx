@@ -12,7 +12,7 @@ import { ChatContextProvider } from "./context/ChatContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:5000";
+axios.defaults.baseURL = "http://localhost:3000";
 axios.defaults.withCredentials = true;
 
 function App() {
