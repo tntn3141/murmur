@@ -4,7 +4,6 @@ import NotificationSingle from "./NotificationSingle";
 
 const NotificationPopup = () => {
   const { combinedNotifications } = useContext(ChatContext);
-  console.log(combinedNotifications)
 
   return (
     <div

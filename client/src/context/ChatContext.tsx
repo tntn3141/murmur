@@ -5,9 +5,10 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useContext,
 } from "react";
 import axios from "axios";
-import { User } from "./AuthContext";
+import { AuthContext, User } from "./AuthContext";
 import { io } from "socket.io-client";
 
 interface ChatContextType {
@@ -72,11 +73,11 @@ export const ChatContext = createContext<ChatContextType>(null);
 
 export const ChatContextProvider = ({
   children,
-  user,
 }: {
   children: React.ReactNode;
-  user: User;
 }) => {
+  const { user } = useContext(AuthContext);
+
   const [userChats, setUserChats] = useState<Array<UserChat>>();
   const [isUserChatsLoading, setIsUserChatsLoading] = useState(false);
   const [userChatsError, setUserChatsError] = useState(null);
@@ -235,7 +236,7 @@ export const ChatContextProvider = ({
   }, [currentChat]);
 
   /* If the user reads the new message(s) by clicking directly on the chat with sender,
-  also clears the associated notification from the notification bar */ 
+  also clears the associated notification from the notification bar */
   useEffect(() => {
     const otherUserId = currentChat?.members.find(
       (id: string) => id !== user._id
