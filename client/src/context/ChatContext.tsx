@@ -103,7 +103,7 @@ export const ChatContextProvider = ({
 
   // Socket
   useEffect(() => {
-    const newSocket = io("http://localhost:3000");
+    const newSocket = io("https://murmur-chat.fly.dev");
     setSocket(newSocket);
     return () => {
       newSocket.disconnect();
@@ -305,6 +305,7 @@ export const ChatContextProvider = ({
 
         isNotificationOpen,
         setIsNotificationOpen,
+
       }}
     >
       {children}
