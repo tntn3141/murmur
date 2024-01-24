@@ -28,7 +28,7 @@ const Chat = () => {
 
   return (
     <div className="flex dark:text-[#949B99] main">
-      <div className="sm:basis-1/3 basis-2 bg-[#F2F3F5] dark:bg-[#1E1F22] dark:bg-[#1a1a1a] dark:text-[#949B99] px-1.5 pt-1.5 sm:px-3 sm:pt-3">
+      <div className="sm:basis-1/3 basis-2 bg-[#F2F3F5] dark:bg-[#1E1F22] dark:bg-[#1a1a1a] dark:text-[#949B99]">
         <FindChat />
         {userChats?.length < 1 ? null : (
           <div className="flex flex-col">

@@ -5,9 +5,10 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useContext,
 } from "react";
 import axios from "axios";
-import { User } from "./AuthContext";
+import { AuthContext, User } from "./AuthContext";
 import { io } from "socket.io-client";
 
 interface ChatContextType {
@@ -35,6 +36,11 @@ interface ChatContextType {
   onlineUsers: Array<OnlineUser>;
 
   notifications: Array<Notification>;
+  combinedNotifications: Array<Notification>;
+  updateCombinedNotifications: (senderId: string) => void;
+
+  isNotificationOpen: boolean;
+  setIsNotificationOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export interface UserChat {
@@ -46,8 +52,8 @@ export interface Message {
   _id: string;
   chatId: string;
   senderId: string;
-  text: string;
   createdAt: string;
+  text: string;
 }
 
 export interface OnlineUser {
@@ -59,17 +65,19 @@ export interface Notification {
   senderId: string;
   isRead: boolean;
   date: Date;
+  text: string;
+  number: number;
 }
 
 export const ChatContext = createContext<ChatContextType>(null);
 
 export const ChatContextProvider = ({
   children,
-  user,
 }: {
   children: React.ReactNode;
-  user: User;
 }) => {
+  const { user } = useContext(AuthContext);
+
   const [userChats, setUserChats] = useState<Array<UserChat>>();
   const [isUserChatsLoading, setIsUserChatsLoading] = useState(false);
   const [userChatsError, setUserChatsError] = useState(null);
@@ -87,6 +95,11 @@ export const ChatContextProvider = ({
   const [onlineUsers, setOnlineUsers] = useState<Array<OnlineUser>>([]);
 
   const [notifications, setNotifications] = useState<Array<Notification>>([]);
+  const [combinedNotifications, setCombinedNotifications] = useState<
+    Array<Notification>
+  >([]);
+
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   // Socket
   useEffect(() => {
@@ -112,7 +125,8 @@ export const ChatContextProvider = ({
   // Socket sendMessage
   useEffect(() => {
     if (socket === null) return;
-    //?
+    /* From currentChat, find the member that IS NOT
+    our logined user, i.e. the one that receives the msg */
     const recipientId = currentChat?.members?.find(
       (id: string) => id !== user?._id
     );
@@ -128,13 +142,15 @@ export const ChatContextProvider = ({
     });
     /* If the new message is from the current chat, it's considered read */
     socket.on("getNotification", (res: Notification) => {
+      // Check if the incoming new msg is from the current chat
       const isCurrentChat = currentChat?.members.some(
         (id) => id === res.senderId
       );
-      console.log("senderId", res.senderId);
-      console.log("currentChatMembers", currentChat.members);
+      // It is important that the new notification is placed at the last index
       if (isCurrentChat) {
-        setNotifications((prev) => [...prev, { ...res, isRead: true }]);
+        /* Consider incoming messages from the current chat read, 
+        and do not include them in the notifications */
+        // setNotifications((prev) => [...prev, { ...res, isRead: true }]);
       } else {
         setNotifications((prev) => [...prev, res]);
       }
@@ -145,6 +161,43 @@ export const ChatContextProvider = ({
       socket.off("getNotification");
     };
   }, [socket, currentChat]);
+
+  /* Combine multiple message notifications from one user 
+  into one single notification */
+  useEffect(() => {
+    if (notifications.length === 0) return;
+
+    const lastNotification = notifications[notifications.length - 1];
+    const results: Array<Notification> = [...combinedNotifications];
+    const lastSenderId = lastNotification.senderId;
+    const isNewSenderId = combinedNotifications?.every(
+      (value) => value.senderId !== lastSenderId
+    );
+    if (isNewSenderId) {
+      results.push(lastNotification);
+    } else {
+      const foundIndex = results.findIndex(
+        (result) => result.senderId === lastSenderId
+      );
+      results[foundIndex] = {
+        ...lastNotification,
+        number: results[foundIndex].number + 1,
+      };
+    }
+    setCombinedNotifications(results);
+  }, [notifications]);
+
+  // Remove checked notification
+  const updateCombinedNotifications = useCallback((senderId: string) => {
+    const foundIndex = combinedNotifications.findIndex(
+      (value) => value.senderId === senderId
+    );
+    const newCombinedNotifications = combinedNotifications.splice(
+      foundIndex,
+      1
+    );
+    setCombinedNotifications(newCombinedNotifications);
+  }, []);
 
   // userChats, isUserChatsLoading, userChatsError
   useEffect(() => {
@@ -180,6 +233,17 @@ export const ChatContextProvider = ({
       }
     };
     getMessages();
+  }, [currentChat]);
+
+  /* If the user reads the new message(s) by clicking directly on the chat with sender,
+  also clears the associated notification from the notification bar */
+  useEffect(() => {
+    const otherUserId = currentChat?.members.find(
+      (id: string) => id !== user._id
+    );
+    if (combinedNotifications.some((value) => value.senderId === otherUserId)) {
+      updateCombinedNotifications(otherUserId);
+    }
   }, [currentChat]);
 
   // setCurrentChat
@@ -236,6 +300,12 @@ export const ChatContextProvider = ({
         onlineUsers,
 
         notifications,
+        combinedNotifications,
+        updateCombinedNotifications,
+
+        isNotificationOpen,
+        setIsNotificationOpen,
+
       }}
     >
       {children}

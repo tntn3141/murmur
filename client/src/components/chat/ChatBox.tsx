@@ -93,9 +93,8 @@ const ChatBox = () => {
           value={textMessage}
           onChange={setTextMessage}
           fontFamily="noto sans"
-          onEnter={() =>
-            sendTextMessage(textMessage, user, currentChat._id, setTextMessage)
-          }
+          onEnter={() => sendTextMessage(textMessage, user, currentChat._id, setTextMessage)}
+
         />
         <button
           className="send-btn flex justify-center items-center w-10"

@@ -11,6 +11,7 @@ const messageRoute = require("./routes/messageRoute");
 const PORT = process.env.PORT || 3000;
 const baseUrl = "https://murmur-chat.netlify.app";
 
+
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server, {
@@ -88,7 +89,9 @@ io.on("connection", (socket) => {
       io.to(user.socketId).emit("getNotification", {
         senderId: message.senderId,
         isRead: false,
+        text: message,
         date: new Date(),
+        number: 1
       });
     }
   });
