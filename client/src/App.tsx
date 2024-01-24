@@ -11,7 +11,7 @@ import { ChatContext } from "./context/ChatContext";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:3000";
+axios.defaults.baseURL = "https://murmur-chat.netlify.app";
 axios.defaults.withCredentials = true;
 
 function App() {
