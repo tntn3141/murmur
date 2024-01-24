@@ -10,11 +10,11 @@ interface Chat {
 }
 
 const onlineIndicatorClasses =
-  "font-bold relative after:absolute after:left-8 " +
-  "after:bottom-6 after:w-3 after:h-3 after:bg-green-400 after:rounded-xl ";
+  "relative after:absolute after:left-9 " +
+  "after:bottom-1.5 after:w-3.5 after:h-3.5 after:bg-green-400 after:rounded-xl ";
 
 const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
-  const { updateCurrentChat, newMessage, onlineUsers } =
+  const { updateCurrentChat, newMessage, onlineUsers, currentChat } =
     useContext(ChatContext);
   const [recipientUser, setRecipientUser] = useState(null);
 
@@ -22,6 +22,7 @@ const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
   const isOnline = onlineUsers?.some(
     (onlineUser) => onlineUser?.userId === recipientId
   );
+  const isCurrentChat = currentChat?.members?.includes(recipientId);
 
   useEffect(() => {
     const getRecipientUser = async () => {
@@ -38,16 +39,22 @@ const UserChat = ({ chat, user }: { chat: Chat; user: User }) => {
   return (
     <div
       className={
-        "my-2 flex gap-2 items-center text-black dark:text-[#949B99] " +
-        (isOnline ? onlineIndicatorClasses : "")
+        "flex gap-2 p-1.5 sm:p-2.5 items-center text-black dark:text-[#949B99] " +
+        (isOnline ? onlineIndicatorClasses : "") +
+        (isCurrentChat ? "bg-[#9B9B9B]" : "b")
       }
       role="button"
       onClick={() => updateCurrentChat(chat)}
     >
-      <Avatar alt={recipientUser?.name} src={recipientUser?.avatar} />
-      <p className="hidden sm:inline">{recipientUser?.name}</p>
+      <Avatar
+        alt={recipientUser?.name}
+        src={recipientUser?.avatar}
+      />
+      <p className={"hidden sm:inline " + (isCurrentChat ? "font-bold" : "")}>{recipientUser?.name}</p>
       <p className="hidden sm:inline truncate">
-        {(newMessage?.chatId === chat._id && newMessage?.senderId === recipientId) ? newMessage?.text : ""}
+        {newMessage?.chatId === chat._id && newMessage?.senderId === recipientId
+          ? newMessage?.text
+          : ""}
       </p>
     </div>
   );

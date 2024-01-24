@@ -47,7 +47,6 @@ const Profile = () => {
       setIsLoading(true);
       const formData = new FormData();
       formData.append("image", userAvatar);
-      console.log("id", user._id);
       const response = await axios.patch(
         `/api/users/update/${user._id}`,
         formData

@@ -39,7 +39,6 @@ const Register = () => {
     /* Append the image file separately because it is of "File" type.
     Note that the key has to be "image" so that multer in the server can intercept it */
     if (userAvatar) {
-      console.log("avatar present");
       formData.append("image", userAvatar);
     }
     // Append the rest to formData in a for...in... loop nicely

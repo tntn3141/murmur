@@ -1,8 +1,10 @@
-import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useContext, useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { Menu, MenuItem } from "@mui/material";
 import { ThemeContext } from "../context/ThemeContext";
+import { Menu, MenuItem } from "@mui/material";
+import NotificationPopup from "./NotificationPopup";
+import { ChatContext } from "../context/ChatContext";
 
 // Styles
 const linkClasses = "hover:text-blue-500 align-items";
@@ -34,8 +36,27 @@ const LightIconSVG = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const NotificationSVG = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="24"
+    viewBox="0 -960 960 960"
+    width="24"
+    fill={props.fill}
+    className={props.className}
+  >
+    <path d="M160-200v-80h80v-280q0-83 50-147.5T420-792v-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820v28q80 20 130 84.5T720-560v280h80v80H160Zm320-300Zm0 420q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM320-280h320v-280q0-66-47-113t-113-47q-66 0-113 47t-47 113v280Z" />
+  </svg>
+);
+
 function NavBar() {
   const { user, logoutUser } = useContext(AuthContext);
+  const {
+    isNotificationOpen,
+    setIsNotificationOpen,
+    combinedNotifications,
+    currentChat,
+  } = useContext(ChatContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -47,6 +68,17 @@ function NavBar() {
   const navigate = useNavigate();
 
   const { theme, toggleTheme } = useContext(ThemeContext);
+
+  let notificationAvailable = combinedNotifications.length > 0;
+  useEffect(() => {
+    notificationAvailable = combinedNotifications.length > 0;
+  }, [currentChat]);
+
+  // Close notification popup when changing route
+  const { pathname } = useLocation();
+  useEffect(() => {
+    setIsNotificationOpen(false);
+  }, [pathname]);
 
   return (
     <nav className="flex justify-between shadow-lg px-4 py-6 items-center dark:text-white dark:bg-black">
@@ -74,12 +106,24 @@ function NavBar() {
       </h1>
 
       <div className="hidden sm:flex gap-4">
+        {user && (<span className="font-bold">{user.name}</span>)}
         <button onClick={() => toggleTheme()} className="block">
           {theme === "light" ? (
             <DarkIconSVG />
           ) : (
             <LightIconSVG stroke={"white"} fill={"white"} />
           )}
+        </button>
+        <button
+          onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+          className={
+            notificationAvailable
+              ? `relative after:absolute after:left-3.5 
+            after:bottom-3 after:w-3 after:h-3 after:bg-red-400 after:rounded-xl`
+              : null
+          }
+        >
+          <NotificationSVG fill={theme === "light" ? "black" : "white"} />
         </button>
         {user && (
           <>
@@ -109,12 +153,24 @@ function NavBar() {
 
       {/* Menu on mobile */}
       <div className="sm:hidden flex gap-4">
+      {user && (<span className="font-bold">{user.name}</span>)}
         <button onClick={() => toggleTheme()} className="block">
           {theme === "light" ? (
             <DarkIconSVG />
           ) : (
             <LightIconSVG stroke={"white"} fill={"white"} />
           )}
+        </button>
+        <button
+          onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+          className={
+            notificationAvailable
+              ? `relative after:absolute after:left-3.5 
+            after:bottom-3 after:w-3 after:h-3 after:bg-red-400 after:rounded-xl`
+              : null
+          }
+        >
+          <NotificationSVG fill={theme === "light" ? "black" : "white"} />
         </button>
         <button
           id="basic-button"
@@ -189,6 +245,7 @@ function NavBar() {
           )}
         </Menu>
       </div>
+      {isNotificationOpen && <NotificationPopup />}
     </nav>
   );
 }

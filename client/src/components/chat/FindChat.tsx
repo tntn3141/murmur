@@ -100,7 +100,7 @@ const FindChat = () => {
   };
 
   return (
-    <div className="">
+    <div className="p-1.5 sm:p-2.5">
       <button
         onClick={(e) => {
           setAnchorEl(e.currentTarget);

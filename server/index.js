@@ -88,7 +88,9 @@ io.on("connection", (socket) => {
       io.to(user.socketId).emit("getNotification", {
         senderId: message.senderId,
         isRead: false,
+        text: message,
         date: new Date(),
+        number: 1
       });
     }
   });

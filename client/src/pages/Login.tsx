@@ -22,7 +22,6 @@ const Login = () => {
     try {
       const response = await axios.post(`/api/users/login`, data);
       const userData = response.data;
-      console.log("aaaaa", userData);
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
