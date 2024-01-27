@@ -19,16 +19,20 @@ axios.defaults.baseURL = isDevMode ? devBaseUrl : prodBaseUrl;
 axios.defaults.withCredentials = true;
 
 function App() {
-  const { combinedNotifications } = useContext(ChatContext);
-  const notificationCount = combinedNotifications.length;
+  const { combinedNotifications, notifications } = useContext(ChatContext);
+  const notificationCount = notifications.length;
   return (
     <HelmetProvider>
       <Helmet>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        {notificationCount && <title>{`(${notificationCount}) Murmur`}</title>}
-        {!notificationCount && <title>Murmur</title>}
-        <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+        {notificationCount && (
+          <title>{`(${notificationCount}) Murmur`}</title>
+        )}
+        {!notificationCount && (
+          <title>Murmur</title>
+        )}
+        <link rel="icon" type="image/svg+xml" href="./assets/favicon.ico" />
       </Helmet>
       <NavBar />
       <Routes>
