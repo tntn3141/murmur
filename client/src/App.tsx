@@ -11,7 +11,11 @@ import { ChatContext } from "./context/ChatContext";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:3000";
+const isDevMode = import.meta.env.DEV;
+const devBaseUrl = import.meta.env.VITE_DEV_SERVER_URL;
+const prodBaseUrl = import.meta.env.VITE_PROD_SERVER_URL;
+
+axios.defaults.baseURL = isDevMode ? devBaseUrl : prodBaseUrl;
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -22,12 +26,8 @@ function App() {
       <Helmet>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        {notificationCount && (
-          <title>{`(${notificationCount}) Murmur`}</title>
-        )}
-        {!notificationCount && (
-          <title>Murmur</title>
-        )}
+        {notificationCount && <title>{`(${notificationCount}) Murmur`}</title>}
+        {!notificationCount && <title>Murmur</title>}
         <link rel="icon" type="image/svg+xml" href="/logo.svg" />
       </Helmet>
       <NavBar />

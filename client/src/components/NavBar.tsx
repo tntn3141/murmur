@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
 import { Menu, MenuItem } from "@mui/material";
-import NotificationPopup from "./NotificationPopup";
+import NotificationSingle from "./NotificationSingle";
 import { ChatContext } from "../context/ChatContext";
 
 // Styles
@@ -51,12 +51,8 @@ const NotificationSVG = (props: React.SVGProps<SVGSVGElement>) => (
 
 function NavBar() {
   const { user, logoutUser } = useContext(AuthContext);
-  const {
-    isNotificationOpen,
-    setIsNotificationOpen,
-    combinedNotifications,
-    currentChat,
-  } = useContext(ChatContext);
+  const { combinedNotifications, currentChat } = useContext(ChatContext);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -106,7 +102,7 @@ function NavBar() {
       </h1>
 
       <div className="hidden sm:flex gap-4">
-        {user && (<span className="font-bold">{user.name}</span>)}
+        {user && <span className="font-bold">{user.name}</span>}
         <button onClick={() => toggleTheme()} className="block">
           {theme === "light" ? (
             <DarkIconSVG />
@@ -153,7 +149,7 @@ function NavBar() {
 
       {/* Menu on mobile */}
       <div className="sm:hidden flex gap-4">
-      {user && (<span className="font-bold">{user.name}</span>)}
+        {user && <span className="font-bold">{user.name}</span>}
         <button onClick={() => toggleTheme()} className="block">
           {theme === "light" ? (
             <DarkIconSVG />
@@ -245,7 +241,29 @@ function NavBar() {
           )}
         </Menu>
       </div>
-      {isNotificationOpen && <NotificationPopup />}
+      {isNotificationOpen && (
+        <div
+          className={`absolute right-0 top-[3.25rem] z-10 w-auto flex flex-col gap-2
+                bg-[#F2F3F5] dark:bg-[#1A1A1A] text-black dark:text-white p-3 
+                overflow-y-auto max-h-[50vh] shadow-lg border border-slate-600
+               `}
+        >
+          <div className="flex justify-between border-b-2 pb-2">
+            <strong>{`Notifications (${combinedNotifications.length})`}</strong>
+            <button className="hover:text-red-600 font-bold" onClick={() => setIsNotificationOpen(false)}>
+              [Close]
+            </button>
+          </div>
+          {combinedNotifications.length === 0 && (
+            <p>You have no notifications right now.</p>
+          )}
+          {combinedNotifications.map((notification, index) => {
+            if (!notification.isRead) {
+              return <NotificationSingle key={index} content={notification} />;
+            }
+          })}
+        </div>
+      )}
     </nav>
   );
 }
