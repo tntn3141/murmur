@@ -9,45 +9,38 @@ import {
 } from "react";
 import axios from "axios";
 import { AuthContext, User } from "./AuthContext";
-import { io } from "socket.io-client";
+import { Socket, io } from "socket.io-client";
 
+// ENV
+const isDevMode = import.meta.env.DEV;
+const devBaseUrl = import.meta.env.VITE_DEV_SERVER_URL;
+const prodBaseUrl = import.meta.env.VITE_PROD_SERVER_URL;
+const baseUrl = isDevMode ? devBaseUrl : prodBaseUrl;
+
+// TYPES
 interface ChatContextType {
-  userChats: Array<UserChat>;
-  setUserChats: Dispatch<SetStateAction<Array<UserChat>>>;
+  userChats: Array<SingleUserChat>;
+  setUserChats: Dispatch<SetStateAction<Array<SingleUserChat>>>;
   isUserChatsLoading: boolean;
   userChatsError: string;
 
-  currentChat: UserChat;
-  updateCurrentChat: (chat: UserChat) => void;
+  currentChat: SingleUserChat;
+  updateCurrentChat: (chat: SingleUserChat) => void;
+  currentChatUser: User;
+  setCurrentChatUser: Dispatch<SetStateAction<User>>;
 
-  messages: Array<Message>;
-  isMessagesLoading: boolean;
-  messagesError: string;
-
-  sendTextMessage: (
-    textMessage: string,
-    sender: User,
-    currentChatId: string,
-    setTextMessage: (arg0: string) => void
-  ) => void;
-  sendTextMessageError: (arg0: string) => void;
-  newMessage: Message;
-
+  socket: Socket;
   onlineUsers: Array<OnlineUser>;
 
   notifications: Array<Notification>;
+  setNotifications: Dispatch<SetStateAction<Array<Notification>>>;
   combinedNotifications: Array<Notification>;
   updateCombinedNotifications: (senderId: string) => void;
-
-  isNotificationOpen: boolean;
-  setIsNotificationOpen: Dispatch<SetStateAction<boolean>>;
 }
-
-export interface UserChat {
+export interface SingleUserChat {
   _id: string;
   members: Array<string>;
 }
-
 export interface Message {
   _id: string;
   chatId: string;
@@ -55,12 +48,10 @@ export interface Message {
   createdAt: string;
   text: string;
 }
-
 export interface OnlineUser {
   userId: string;
   socketId: string;
 }
-
 export interface Notification {
   senderId: string;
   isRead: boolean;
@@ -78,18 +69,12 @@ export const ChatContextProvider = ({
 }) => {
   const { user } = useContext(AuthContext);
 
-  const [userChats, setUserChats] = useState<Array<UserChat>>();
+  const [userChats, setUserChats] = useState<Array<SingleUserChat>>([]);
   const [isUserChatsLoading, setIsUserChatsLoading] = useState(false);
   const [userChatsError, setUserChatsError] = useState(null);
 
-  const [currentChat, setCurrentChat] = useState<UserChat>(null);
-
-  const [messages, setMessages] = useState<Array<Message>>(null);
-  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
-  const [messagesError, setMessagesError] = useState(null);
-
-  const [sendTextMessageError, setSendTextMessageError] = useState(null);
-  const [newMessage, setNewMessage] = useState(null);
+  const [currentChat, setCurrentChat] = useState<SingleUserChat>(null);
+  const [currentChatUser, setCurrentChatUser] = useState<User>(null);
 
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState<Array<OnlineUser>>([]);
@@ -99,11 +84,9 @@ export const ChatContextProvider = ({
     Array<Notification>
   >([]);
 
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-
   // Socket
   useEffect(() => {
-    const newSocket = io("https://murmur-chat.fly.dev");
+    const newSocket = io(baseUrl);
     setSocket(newSocket);
     return () => {
       newSocket.disconnect();
@@ -120,47 +103,24 @@ export const ChatContextProvider = ({
     return () => {
       socket.off("getOnlineUsers");
     };
-  }, [socket]);
+  }, [socket, user]);
 
-  // Socket sendMessage
   useEffect(() => {
-    if (socket === null) return;
-    /* From currentChat, find the member that IS NOT
-    our logined user, i.e. the one that receives the msg */
-    const recipientId = currentChat?.members?.find(
-      (id: string) => id !== user?._id
-    );
-    socket.emit("sendMessage", { ...newMessage, recipientId });
-  }, [newMessage]);
-
-  // Socket receiveMessage receiveNotification
-  useEffect(() => {
-    if (socket === null) return;
-    socket.on("getMessage", (res: Message) => {
-      if (currentChat?._id !== res.chatId) return;
-      setMessages((prev) => [...prev, res]);
-    });
-    /* If the new message is from the current chat, it's considered read */
-    socket.on("getNotification", (res: Notification) => {
-      // Check if the incoming new msg is from the current chat
-      const isCurrentChat = currentChat?.members.some(
-        (id) => id === res.senderId
-      );
-      // It is important that the new notification is placed at the last index
-      if (isCurrentChat) {
-        /* Consider incoming messages from the current chat read, 
-        and do not include them in the notifications */
-        // setNotifications((prev) => [...prev, { ...res, isRead: true }]);
-      } else {
-        setNotifications((prev) => [...prev, res]);
+    const getUserChats = async () => {
+      setIsUserChatsLoading(true);
+      setUserChatsError(null);
+      try {
+        const response = await axios.get(`/api/chats/${user?._id}`);
+        setUserChats(response.data);
+      } catch (error) {
+        console.log(error);
+        setUserChatsError(error);
+      } finally {
+        setIsUserChatsLoading(false);
       }
-    });
-
-    return () => {
-      socket.off("getMessage");
-      socket.off("getNotification");
     };
-  }, [socket, currentChat]);
+    getUserChats();
+  }, [user]);
 
   /* Combine multiple message notifications from one user 
   into one single notification */
@@ -199,42 +159,6 @@ export const ChatContextProvider = ({
     setCombinedNotifications(newCombinedNotifications);
   }, []);
 
-  // userChats, isUserChatsLoading, userChatsError
-  useEffect(() => {
-    const getUserChats = async () => {
-      setIsUserChatsLoading(true);
-      setUserChatsError(null);
-      try {
-        const response = await axios.get(`/api/chats/${user?._id}`);
-        setUserChats(response.data);
-      } catch (error) {
-        console.log(error);
-        setUserChatsError(error);
-      } finally {
-        setIsUserChatsLoading(false);
-      }
-    };
-
-    getUserChats();
-  }, [user]);
-
-  // currentChat, messages, isMessagesLoading, messagesError
-  useEffect(() => {
-    const getMessages = async () => {
-      try {
-        setIsMessagesLoading(true);
-        setMessagesError(null);
-        const response = await axios.get(`/api/messages/${currentChat?._id}`);
-        setMessages(response.data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsMessagesLoading(false);
-      }
-    };
-    getMessages();
-  }, [currentChat]);
-
   /* If the user reads the new message(s) by clicking directly on the chat with sender,
   also clears the associated notification from the notification bar */
   useEffect(() => {
@@ -247,36 +171,9 @@ export const ChatContextProvider = ({
   }, [currentChat]);
 
   // setCurrentChat
-  const updateCurrentChat = useCallback((chat: UserChat) => {
+  const updateCurrentChat = useCallback((chat: SingleUserChat) => {
     setCurrentChat(chat);
   }, []);
-
-  const sendTextMessage = useCallback(
-    async (
-      textMessage: string,
-      sender: User,
-      currentChatId: string,
-      setTextMessage: (arg0: string) => void
-    ) => {
-      if (!textMessage) {
-        return;
-      }
-
-      try {
-        const response = await axios.post(`/api/messages`, {
-          chatId: currentChatId,
-          senderId: sender._id,
-          text: textMessage,
-        });
-        setNewMessage(response.data);
-        setMessages((prev: Array<Message>) => [...prev, response.data]);
-        setTextMessage("");
-      } catch (error) {
-        return setSendTextMessageError(error);
-      }
-    },
-    []
-  );
 
   return (
     <ChatContext.Provider
@@ -288,23 +185,17 @@ export const ChatContextProvider = ({
 
         currentChat,
         updateCurrentChat,
+        currentChatUser,
+        setCurrentChatUser,
 
-        messages,
-        isMessagesLoading,
-        messagesError,
-
-        sendTextMessage,
-        sendTextMessageError,
-        newMessage,
-
+        socket,
         onlineUsers,
 
         notifications,
         combinedNotifications,
         updateCombinedNotifications,
 
-        isNotificationOpen,
-        setIsNotificationOpen,
+        setNotifications,
 
       }}
     >
