@@ -9,7 +9,8 @@ const chatRoute = require("./routes/chatRoute");
 const messageRoute = require("./routes/messageRoute");
 
 const PORT = process.env.PORT || 3000;
-const baseUrl = "http://localhost:5173";
+const baseUrl = "https://murmur-chat.netlify.app";
+
 
 const app = express();
 const server = require("http").createServer(app);
@@ -33,7 +34,7 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: baseUrl,
+    origin: baseUrl, // https://murmur-chat.netlify.app
   })
 );
 app.use((req, res, next) => {
@@ -102,5 +103,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Application is running at port ${PORT}`);
+  console.log(`Application is running at https://murmur-chat.fly.dev:${PORT}`);
 })
