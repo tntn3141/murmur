@@ -4,13 +4,11 @@ import { User } from "../context/AuthContext";
 import axios from "axios";
 import { Avatar } from "@mui/material";
 
-const NotificationSingle = ({ content }: { content: Notification }) => {
-  const {
-    updateCurrentChat,
-    userChats,
-    updateCombinedNotifications,
-    setIsNotificationOpen,
-  } = useContext(ChatContext);
+const NotificationSingle: React.FC<{ content: Notification }> = ({
+  content,
+}) => {
+  const { updateCurrentChat, userChats, updateCombinedNotifications } =
+    useContext(ChatContext);
   const [sender, setSender] = useState<User>(null);
   const thisChat = userChats.find((chat) =>
     chat?.members?.includes(sender?._id)
@@ -28,22 +26,20 @@ const NotificationSingle = ({ content }: { content: Notification }) => {
 
   const handleClickNotification = () => {
     updateCombinedNotifications(sender._id);
-    setIsNotificationOpen(false);
     updateCurrentChat(thisChat);
   };
 
   return (
     <div>
-      <button
-        onClick={handleClickNotification}
-        className="flex items-center gap-2"
-      >
-        <Avatar alt={sender?.name} src={sender?.avatar} />
-        You have
-        {content.number === 1
-          ? ` a new message `
-          : ` ${content.number} new messages `}
-        from <strong>{sender?.name}</strong>
+      <button onClick={handleClickNotification} className="flex items-center">
+        <Avatar alt={sender?.name} src={sender?.avatar} className="mr-2" />
+        <p>
+          You have
+          {content.number === 1
+            ? ` a new message `
+            : ` ${content.number} new messages `}
+          from <span className="font-bold">{sender?.name}</span>
+        </p>
       </button>
     </div>
   );

@@ -11,12 +11,16 @@ import { ChatContext } from "./context/ChatContext";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import axios from "axios";
 
-axios.defaults.baseURL = "https://murmur-chat.fly.dev";
+const isDevMode = import.meta.env.DEV;
+const devBaseUrl = import.meta.env.VITE_DEV_SERVER_URL;
+const prodBaseUrl = import.meta.env.VITE_PROD_SERVER_URL;
+
+axios.defaults.baseURL = isDevMode ? devBaseUrl : prodBaseUrl;
 axios.defaults.withCredentials = true;
 
 function App() {
-  const { combinedNotifications } = useContext(ChatContext);
-  const notificationCount = combinedNotifications.length;
+  const { combinedNotifications, notifications } = useContext(ChatContext);
+  const notificationCount = notifications.length;
   return (
     <HelmetProvider>
       <Helmet>
