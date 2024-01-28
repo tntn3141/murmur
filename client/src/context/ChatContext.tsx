@@ -11,12 +11,6 @@ import axios from "axios";
 import { AuthContext, User } from "./AuthContext";
 import { Socket, io } from "socket.io-client";
 
-// ENV
-const isDevMode = import.meta.env.DEV;
-const devBaseUrl = import.meta.env.VITE_DEV_SERVER_URL;
-const prodBaseUrl = import.meta.env.VITE_PROD_SERVER_URL;
-const baseUrl = isDevMode ? devBaseUrl : prodBaseUrl;
-
 // TYPES
 interface ChatContextType {
   userChats: Array<SingleUserChat>;
@@ -40,13 +34,6 @@ interface ChatContextType {
 export interface SingleUserChat {
   _id: string;
   members: Array<string>;
-}
-export interface Message {
-  _id: string;
-  chatId: string;
-  senderId: string;
-  createdAt: string;
-  text: string;
 }
 export interface OnlineUser {
   userId: string;
@@ -86,7 +73,7 @@ export const ChatContextProvider = ({
 
   // Socket
   useEffect(() => {
-    const newSocket = io(baseUrl);
+    const newSocket = io("/");
     setSocket(newSocket);
     return () => {
       newSocket.disconnect();
@@ -113,7 +100,6 @@ export const ChatContextProvider = ({
         const response = await axios.get(`/api/chats/${user?._id}`);
         setUserChats(response.data);
       } catch (error) {
-        console.log(error);
         setUserChatsError(error);
       } finally {
         setIsUserChatsLoading(false);
@@ -196,7 +182,6 @@ export const ChatContextProvider = ({
         updateCombinedNotifications,
 
         setNotifications,
-
       }}
     >
       {children}
