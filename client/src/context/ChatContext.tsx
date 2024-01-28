@@ -35,6 +35,13 @@ export interface SingleUserChat {
   _id: string;
   members: Array<string>;
 }
+export interface Message {
+  _id: string;
+  chatId: string;
+  senderId: string;
+  createdAt: string;
+  text: string;
+}
 export interface OnlineUser {
   userId: string;
   socketId: string;
@@ -100,6 +107,7 @@ export const ChatContextProvider = ({
         const response = await axios.get(`/api/chats/${user?._id}`);
         setUserChats(response.data);
       } catch (error) {
+        console.log(error);
         setUserChatsError(error);
       } finally {
         setIsUserChatsLoading(false);
@@ -182,6 +190,7 @@ export const ChatContextProvider = ({
         updateCombinedNotifications,
 
         setNotifications,
+
       }}
     >
       {children}
