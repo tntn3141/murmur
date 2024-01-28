@@ -196,7 +196,6 @@ export const ChatContextProvider = ({
         updateCombinedNotifications,
 
         setNotifications,
-
       }}
     >
       {children}

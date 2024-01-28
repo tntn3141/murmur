@@ -9,16 +9,15 @@ const chatRoute = require("./routes/chatRoute");
 const messageRoute = require("./routes/messageRoute");
 
 const PORT = process.env.PORT || 3000;
-const baseUrl = "https://murmur-chat.netlify.app";
-
+const baseUrl = "http://localhost:5173";
 
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server, {
   cors: {
-    origin: baseUrl
-  }
-})
+    origin: baseUrl,
+  },
+});
 
 const multer = Multer({
   storage: Multer.memoryStorage(),
@@ -66,8 +65,6 @@ mongoose
 // Socket
 let onlineUsers = [];
 io.on("connection", (socket) => {
-  console.log("New connection", socket.id);
-
   // Listen to a connection
   socket.on("addNewUser", (userId) => {
     !onlineUsers.some((user) => user.userId === userId) &&
@@ -81,17 +78,29 @@ io.on("connection", (socket) => {
   /* Listen to users sending messages, 
   then push notifications/messages to recipients */
   socket.on("sendMessage", (message) => {
-    const user = onlineUsers.find((user) => {
-      return user.userId === message.recipientId;
+    const recipientUser = onlineUsers.find((onlineUser) => {
+      return onlineUser.userId === message.recipientId;
     });
-    if (user) {
-      io.to(user.socketId).emit("getMessage", message);
-      io.to(user.socketId).emit("getNotification", {
+    if (recipientUser) {
+      io.to(recipientUser.socketId).emit("getMessage", message);
+      io.to(recipientUser.socketId).emit("getNotification", {
         senderId: message.senderId,
         isRead: false,
         text: message,
         date: new Date(),
-        number: 1
+        number: 1,
+      });
+    }
+  });
+
+  socket.on("sendIsTyping", ({ user, currentChatUser, textMessage }) => {
+    const recipientUser = onlineUsers.find((onlineUser) => {
+      return onlineUser.userId === currentChatUser?._id;
+    });
+    if (recipientUser) {
+      io.to(recipientUser.socketId).emit("getIsTyping", {
+        name: user.name,
+        isTyping: textMessage.length > 0,
       });
     }
   });
@@ -104,4 +113,4 @@ io.on("connection", (socket) => {
 
 server.listen(PORT, () => {
   console.log(`Application is running at https://murmur-chat.fly.dev:${PORT}`);
-})
+});

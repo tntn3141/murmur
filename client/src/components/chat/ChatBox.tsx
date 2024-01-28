@@ -10,6 +10,11 @@ import { ChatContext, Message, Notification } from "../../context/ChatContext";
 import { ThemeContext } from "../../context/ThemeContext";
 import { useFetchRecipient } from "../../hooks/useFetchRecipient";
 
+interface IsTypingResType {
+  name: string;
+  isTyping: boolean;
+}
+
 const PaperplaneSVG = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -25,7 +30,8 @@ const PaperplaneSVG = (props: React.SVGProps<SVGSVGElement>) => (
 
 const ChatBox = () => {
   const { user } = useContext(AuthContext);
-  const { currentChat, socket, setNotifications } = useContext(ChatContext);
+  const { currentChat, socket, setNotifications, currentChatUser } =
+    useContext(ChatContext);
   const [textMessage, setTextMessage] = useState("");
   const [newMessage, setNewMessage] = useState(null);
 
@@ -39,6 +45,8 @@ const ChatBox = () => {
   const [messagesError, setMessagesError] = useState(null);
 
   const [sendTextMessageError, setSendTextMessageError] = useState(null);
+
+  const [isTyping, setIsTyping] = useState("");
 
   const { theme } = useContext(ThemeContext);
   const scroll = useRef(null);
@@ -95,7 +103,26 @@ const ChatBox = () => {
       socket.off("getMessage");
       socket.off("getNotification");
     };
-  }, [socket, currentChat]);
+  }, [socket, currentChat, isTyping]);
+
+  // Socket send isTyping status
+  useEffect(() => {
+    if (socket === null) return;
+    socket.emit("sendIsTyping", {
+      user,
+      currentChatUser,
+      textMessage,
+    });
+
+    // Receive isTyping status
+    socket.on("getIsTyping", (res: IsTypingResType) => {
+      if (res.isTyping) {
+        setIsTyping(`${res.name} is typing...`);
+      } else {
+        setIsTyping("");
+      }
+    });
+  }, [textMessage, isTyping]);
 
   const sendTextMessage = async (
     textMessage: string,
@@ -190,6 +217,7 @@ const ChatBox = () => {
                 </Box>
               );
             })}
+            {isTyping && <span className="italic text-sm">{isTyping}</span>}
           </>
         )}
       </Box>
